@@ -1,0 +1,58 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: #17212B;
+  --dark: #10161C;
+  --bg-warm: #F7F5F0;
+  --surface: #FFFFFF;
+  --accent-gold: #B08D57;
+  --gold-hover: #9A7947;
+  --gold-light: #F4EFEA;
+  --text-main: #242424;
+  --muted-text: #6F6F6F;
+  --border-light: #E5E2DC;
+  --border-dark: #2A3644;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    background-color: var(--bg-warm);
+    color: var(--text-main);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    font-family: var(--font-inter), system-ui, sans-serif;
+    background-color: var(--bg-warm);
+    color: var(--text-main);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  h1, h2, h3, h4, .font-serif {
+    font-family: var(--font-playfair), Georgia, serif;
+  }
+}
+
+/* Custom Tailwind Utility Components */
+@layer components {
+  .btn-accent {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3.5 text-xs md:text-sm font-semibold tracking-wide text-white bg-accent-gold rounded hover:bg-gold-hover transition-all duration-200 shadow-sm hover:shadow-md cursor-pointer;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3.5 text-xs md:text-sm font-semibold tracking-wide text-white bg-primary rounded hover:bg-dark transition-all duration-200 shadow-sm hover:shadow-md cursor-pointer;
+  }
+
+  .btn-outline {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3.5 text-xs md:text-sm font-semibold tracking-wide text-primary bg-transparent border border-primary rounded hover:bg-primary hover:text-white transition-all duration-200 cursor-pointer;
+  }
+
+  .badge-gold {
+    @apply inline-flex items-center gap-1.5 px-3.5 py-1 text-[11px] font-semibold tracking-wider uppercase text-accent-gold bg-gold-light border border-accent-gold/25 rounded-full;
+  }
+}
