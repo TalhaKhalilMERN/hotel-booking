@@ -1,104 +1,255 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { ROOMS_DATA } from "@/data/rooms";
 import RoomCard from "@/components/rooms/RoomCard";
-import { HOTEL_INFO } from "@/data/hotelInfo";
-import { Filter } from "lucide-react";
+import { Filter, RotateCcw, SlidersHorizontal, ChevronDown, Check } from "lucide-react";
 
 export default function RoomsPage() {
-  const [filterCategory, setFilterCategory] = useState("all");
+  const [bedType, setBedType] = useState<string>("all");
+  const [guestCount, setGuestCount] = useState<string>("all");
+  const [maxPrice, setMaxPrice] = useState<number>(25000);
+  const [viewFilter, setViewFilter] = useState<string>("all");
+  const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
 
-  const filteredRooms = ROOMS_DATA.filter((room) => {
-    if (filterCategory === "all") return true;
-    if (filterCategory === "suite") return room.name.toLowerCase().includes("suite");
-    if (filterCategory === "king") return room.bedType.toLowerCase().includes("king");
-    if (filterCategory === "family") return room.bedType.toLowerCase().includes("queen") || room.name.toLowerCase().includes("family");
-    return true;
-  });
+  const resetFilters = () => {
+    setBedType("all");
+    setGuestCount("all");
+    setMaxPrice(25000);
+    setViewFilter("all");
+  };
+
+  const filteredRooms = useMemo(() => {
+    return ROOMS_DATA.filter((room) => {
+      // Bed Type
+      if (bedType !== "all") {
+        if (bedType === "king" && !room.bedType.toLowerCase().includes("king")) return false;
+        if (bedType === "queen" && !room.bedType.toLowerCase().includes("queen")) return false;
+      }
+
+      // Guest Count
+      if (guestCount !== "all") {
+        const count = parseInt(guestCount);
+        if (room.capacity.adults < count) return false;
+      }
+
+      // Max Price
+      if (room.pricePerNight > maxPrice) return false;
+
+      // View
+      if (viewFilter !== "all") {
+        if (!room.view.toLowerCase().includes(viewFilter.toLowerCase())) return false;
+      }
+
+      return true;
+    });
+  }, [bedType, guestCount, maxPrice, viewFilter]);
+
+  const activeFiltersCount =
+    (bedType !== "all" ? 1 : 0) +
+    (guestCount !== "all" ? 1 : 0) +
+    (maxPrice < 25000 ? 1 : 0) +
+    (viewFilter !== "all" ? 1 : 0);
 
   return (
-    <div className="bg-bg-warm min-h-screen">
+    <div className="bg-bg min-h-screen pb-20">
       {/* Header Banner */}
-      <section className="bg-primary text-white py-16 text-center">
+      <section className="bg-accent-blue-tint/50 border-b border-border py-12 lg:py-16 text-center">
         <div className="max-w-7xl mx-auto px-6 lg:px-10">
-          <span className="badge-gold">Hamilton Accommodations</span>
-          <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-semibold text-white mt-3 mb-3">
+          <span className="badge-blue mb-2.5">Hamilton Accommodations</span>
+          <h1 className="font-heading text-3xl sm:text-4xl lg:text-5xl font-bold text-text-primary mt-1 mb-3">
             Rooms & Suite Rates
           </h1>
-          <p className="text-sm sm:text-base text-slate-300 max-w-xl mx-auto leading-relaxed">
-            All room rates are in Pakistani Rupees (PKR) and include complimentary breakfast, high-speed Wi-Fi, and 24/7 reception support.
+          <p className="text-sm sm:text-base text-text-secondary max-w-xl mx-auto leading-relaxed">
+            All room rates are direct in Pakistani Rupees (PKR) and include complimentary breakfast, high-speed Wi-Fi, and 24/7 power backup.
           </p>
         </div>
       </section>
 
-      {/* Category Filter Bar */}
-      <section className="bg-surface border-b border-border-light py-4">
-        <div className="max-w-7xl mx-auto px-6 lg:px-10 flex flex-wrap items-center justify-between gap-4">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs font-semibold uppercase text-muted-text mr-2 flex items-center gap-1">
-              <Filter size={13} className="text-accent-gold" />
-              Filter By:
-            </span>
+      {/* Main Container: Filter Sidebar + Room Results List */}
+      <div className="max-w-7xl mx-auto px-6 lg:px-10 pt-10">
+        {/* Mobile Filter Toggle Button */}
+        <div className="lg:hidden mb-6 flex items-center justify-between gap-4">
+          <button
+            onClick={() => setMobileFilterOpen(!mobileFilterOpen)}
+            className="btn-secondary px-4 py-2.5 text-xs font-bold inline-flex items-center gap-2"
+          >
+            <SlidersHorizontal size={15} className="text-accent-blue" />
+            <span>Filters {activeFiltersCount > 0 && `(${activeFiltersCount})`}</span>
+            <ChevronDown
+              size={15}
+              className={`transition-transform duration-200 ${mobileFilterOpen ? "rotate-180" : ""}`}
+            />
+          </button>
 
-            <button
-              className={`px-4 py-1.5 text-xs font-semibold rounded-full border transition-all cursor-pointer ${
-                filterCategory === "all"
-                  ? "bg-primary text-white border-primary"
-                  : "bg-bg-warm text-text-main border-border-light hover:border-accent-gold hover:text-accent-gold"
-              }`}
-              onClick={() => setFilterCategory("all")}
-            >
-              All Rooms ({ROOMS_DATA.length})
-            </button>
-            <button
-              className={`px-4 py-1.5 text-xs font-semibold rounded-full border transition-all cursor-pointer ${
-                filterCategory === "king"
-                  ? "bg-primary text-white border-primary"
-                  : "bg-bg-warm text-text-main border-border-light hover:border-accent-gold hover:text-accent-gold"
-              }`}
-              onClick={() => setFilterCategory("king")}
-            >
-              King Rooms
-            </button>
-            <button
-              className={`px-4 py-1.5 text-xs font-semibold rounded-full border transition-all cursor-pointer ${
-                filterCategory === "suite"
-                  ? "bg-primary text-white border-primary"
-                  : "bg-bg-warm text-text-main border-border-light hover:border-accent-gold hover:text-accent-gold"
-              }`}
-              onClick={() => setFilterCategory("suite")}
-            >
-              Master Suites
-            </button>
-            <button
-              className={`px-4 py-1.5 text-xs font-semibold rounded-full border transition-all cursor-pointer ${
-                filterCategory === "family"
-                  ? "bg-primary text-white border-primary"
-                  : "bg-bg-warm text-text-main border-border-light hover:border-accent-gold hover:text-accent-gold"
-              }`}
-              onClick={() => setFilterCategory("family")}
-            >
-              Family Rooms
-            </button>
-          </div>
-
-          <div className="text-xs text-muted-text">
-            Showing <strong className="text-primary">{filteredRooms.length}</strong> room categories
-          </div>
+          <span className="text-xs text-text-secondary">
+            Showing <strong className="text-text-primary">{filteredRooms.length}</strong> rooms
+          </span>
         </div>
-      </section>
 
-      {/* Main Rooms Grid */}
-      <section className="py-16">
-        <div className="max-w-7xl mx-auto px-6 lg:px-10">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredRooms.map((room) => (
-              <RoomCard key={room.id} room={room} />
-            ))}
-          </div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          {/* Left Filter Sidebar */}
+          <aside
+            className={`lg:col-span-4 xl:col-span-3 ${
+              mobileFilterOpen ? "block" : "hidden lg:block"
+            }`}
+          >
+            <div className="card-base p-6 rounded-2xl bg-white border border-border/70 shadow-sm sticky top-24 space-y-6">
+              <div className="flex items-center justify-between pb-4 border-b border-border/70">
+                <div className="flex items-center gap-2 font-heading font-bold text-base text-text-primary">
+                  <Filter size={16} className="text-accent-blue" />
+                  <span>Filter Results</span>
+                </div>
+
+                {activeFiltersCount > 0 && (
+                  <button
+                    onClick={resetFilters}
+                    className="text-xs font-semibold text-accent-blue hover:text-accent-blue-hover inline-flex items-center gap-1 cursor-pointer"
+                  >
+                    <RotateCcw size={12} />
+                    <span>Reset</span>
+                  </button>
+                )}
+              </div>
+
+              {/* Price Range Filter */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-xs font-bold uppercase tracking-wider text-text-muted">
+                    Max Price Per Night
+                  </label>
+                  <span className="text-xs font-bold text-accent-blue">
+                    Rs. {maxPrice.toLocaleString()}
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min="8500"
+                  max="25000"
+                  step="500"
+                  value={maxPrice}
+                  onChange={(e) => setMaxPrice(parseInt(e.target.value))}
+                  className="w-full accent-accent-blue cursor-pointer"
+                />
+                <div className="flex justify-between text-[11px] text-text-muted mt-1">
+                  <span>Rs. 8,500</span>
+                  <span>Rs. 25,000</span>
+                </div>
+              </div>
+
+              {/* Bed Type */}
+              <div className="pt-2 border-t border-border/60">
+                <label className="text-xs font-bold uppercase tracking-wider text-text-muted block mb-2.5">
+                  Bedding Type
+                </label>
+                <div className="flex flex-col gap-2">
+                  {[
+                    { id: "all", label: "All Bed Types" },
+                    { id: "king", label: "King Bed" },
+                    { id: "queen", label: "Queen / Twin Beds" },
+                  ].map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => setBedType(item.id)}
+                      className={`text-left text-xs font-medium px-3 py-2 rounded-xl transition-all flex items-center justify-between cursor-pointer ${
+                        bedType === item.id
+                          ? "bg-accent-blue-tint text-accent-blue font-bold"
+                          : "text-text-secondary hover:bg-surface-warm"
+                      }`}
+                    >
+                      <span>{item.label}</span>
+                      {bedType === item.id && <Check size={14} className="text-accent-blue" />}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Guests Count */}
+              <div className="pt-2 border-t border-border/60">
+                <label className="text-xs font-bold uppercase tracking-wider text-text-muted block mb-2.5">
+                  Min Guests
+                </label>
+                <div className="grid grid-cols-3 gap-1.5">
+                  {[
+                    { id: "all", label: "Any" },
+                    { id: "2", label: "2+" },
+                    { id: "3", label: "3+" },
+                  ].map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => setGuestCount(item.id)}
+                      className={`text-center text-xs py-2 rounded-xl border transition-all cursor-pointer font-semibold ${
+                        guestCount === item.id
+                          ? "bg-accent-blue text-white border-accent-blue shadow-xs"
+                          : "bg-surface-warm text-text-secondary border-border hover:border-accent-blue/40"
+                      }`}
+                    >
+                      {item.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Room View */}
+              <div className="pt-2 border-t border-border/60">
+                <label className="text-xs font-bold uppercase tracking-wider text-text-muted block mb-2.5">
+                  Room View
+                </label>
+                <div className="flex flex-col gap-2">
+                  {[
+                    { id: "all", label: "All Views" },
+                    { id: "gt road", label: "GT Road Avenue View" },
+                    { id: "courtyard", label: "Courtyard View" },
+                  ].map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => setViewFilter(item.id)}
+                      className={`text-left text-xs font-medium px-3 py-2 rounded-xl transition-all flex items-center justify-between cursor-pointer ${
+                        viewFilter === item.id
+                          ? "bg-accent-blue-tint text-accent-blue font-bold"
+                          : "text-text-secondary hover:bg-surface-warm"
+                      }`}
+                    >
+                      <span>{item.label}</span>
+                      {viewFilter === item.id && <Check size={14} className="text-accent-blue" />}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </aside>
+
+          {/* Right Results Column (Vertical List) */}
+          <main className="lg:col-span-8 xl:col-span-9 flex flex-col gap-6">
+            {/* Header info bar */}
+            <div className="hidden lg:flex items-center justify-between pb-3 border-b border-border/70 text-xs text-text-secondary">
+              <span>
+                Showing <strong className="text-text-primary font-bold">{filteredRooms.length}</strong> available rooms & suites
+              </span>
+              <span className="text-accent-blue font-medium">Direct Booking Guarantee &bull; PKR</span>
+            </div>
+
+            {/* Room List Cards */}
+            {filteredRooms.length === 0 ? (
+              <div className="card-base p-12 text-center rounded-2xl bg-white border border-border/70">
+                <h3 className="font-heading text-lg font-bold text-text-primary mb-2">
+                  No rooms match your filter criteria
+                </h3>
+                <p className="text-sm text-text-secondary mb-5">
+                  Try adjusting your price range, bedding type, or view preferences.
+                </p>
+                <button onClick={resetFilters} className="btn-primary text-xs px-5 py-2.5">
+                  Reset All Filters
+                </button>
+              </div>
+            ) : (
+              filteredRooms.map((room) => (
+                <RoomCard key={room.id} room={room} horizontal={true} />
+              ))
+            )}
+          </main>
         </div>
-      </section>
+      </div>
     </div>
   );
 }

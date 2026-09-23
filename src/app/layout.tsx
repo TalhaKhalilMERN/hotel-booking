@@ -1,25 +1,27 @@
 import type { Metadata } from "next";
-import { Playfair_Display, Inter } from "next/font/google";
+import { Manrope, Inter } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 
-const playfair = Playfair_Display({
+const manrope = Manrope({
   subsets: ["latin"],
-  variable: "--font-playfair",
+  weight: ["500", "600", "700", "800"],
+  variable: "--font-manrope",
   display: "swap",
 });
 
 const inter = Inter({
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
   variable: "--font-inter",
   display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "The Grand Atelier | Premium Boutique Hotel & Direct Reservation",
-  description: "Experience refined luxury, tailored comfort, and 44 bespoke guest rooms at The Grand Atelier. Reserve directly for exclusive rates and artisan breakfast.",
-  keywords: ["boutique hotel", "direct booking", "luxury hotel rooms", "hotel reservation"],
+  title: "Hamilton Hotel & Suites | Comfortable Stays on GT Road, Hamilton",
+  description: "Clean, comfortable 45 rooms with 24/7 power generator backup, free breakfast, and direct booking on GT Road, Hamilton, Pakistan.",
+  keywords: ["Hamilton Hotel", "GT Road Hotel", "Pakistan Hotel", "Direct Booking"],
 };
 
 export default function RootLayout({
@@ -28,10 +30,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${playfair.variable} ${inter.variable}`}>
-      <body>
+    <html lang="en" className={`${manrope.variable} ${inter.variable}`}>
+      <body className="font-sans antialiased bg-bg text-text-primary min-h-screen flex flex-col">
         <Header />
-        <main style={{ flex: 1 }}>
+        <main className="flex-1">
           {children}
         </main>
         <Footer />

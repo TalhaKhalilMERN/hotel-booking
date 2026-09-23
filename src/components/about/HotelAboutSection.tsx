@@ -1,60 +1,84 @@
 import { HOTEL_INFO } from "@/data/hotelInfo";
-import { ShieldCheck, MapPin } from "lucide-react";
+import { ShieldCheck, Star, BedDouble, Zap, Shield, Sparkles } from "lucide-react";
 
 export default function HotelAboutSection() {
   return (
-    <section className="py-20 bg-bg-warm" id="about">
+    <section className="py-20 lg:py-24 bg-bg scroll-mt-24" id="about">
       <div className="max-w-7xl mx-auto px-6 lg:px-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          {/* Narrative Column */}
-          <div className="lg:col-span-7">
-            <span className="badge-gold">About Our Hotel</span>
-            <h2 className="font-serif text-3xl sm:text-4xl font-semibold text-primary mt-3 mb-5 leading-tight">
-              Hospitality & Comfort in Hamilton along GT Road
-            </h2>
+        {/* Single Soft-Shadowed White Card Wrapping the Whole Section */}
+        <div className="card-elevated p-6 sm:p-10 lg:p-12 rounded-3xl bg-white border border-border/70">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
+            {/* Narrative Column */}
+            <div className="lg:col-span-7">
+              <span className="badge-blue mb-3">About Our Hotel</span>
+              <h2 className="font-heading text-3xl sm:text-4xl font-bold text-text-primary mt-1 mb-4 leading-tight">
+                A Reliable Stay for Travelers on GT Road
+              </h2>
 
-            <p className="text-base font-medium text-primary leading-relaxed mb-4">
-              {HOTEL_INFO.name} offers clean, modern guest accommodations tailored for business travelers, families, and road visitors along GT Road, Hamilton, Pakistan.
-            </p>
-
-            <p className="text-sm md:text-base text-muted-text leading-relaxed mb-8">
-              Our 45 rooms feature comfortable bedding, independent air conditioning, hot shower water, generator backup, and high-speed Wi-Fi connectivity. Whether visiting Hamilton for work or stopping over during highway travel, enjoy our round-the-clock service and secure on-site parking.
-            </p>
-
-            <div className="grid grid-cols-3 gap-6 pt-6 border-t border-border-light">
-              <div>
-                <div className="font-serif text-3xl font-bold text-accent-gold mb-1">45</div>
-                <div className="text-xs font-semibold uppercase tracking-wider text-muted-text">Guest Rooms</div>
-              </div>
-              <div>
-                <div className="font-serif text-3xl font-bold text-accent-gold mb-1">24/7</div>
-                <div className="text-xs font-semibold uppercase tracking-wider text-muted-text">Reception & Security</div>
-              </div>
-              <div>
-                <div className="font-serif text-3xl font-bold text-accent-gold mb-1">PKR</div>
-                <div className="text-xs font-semibold uppercase tracking-wider text-muted-text">Direct Rates</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Image Column */}
-          <div className="lg:col-span-5 relative">
-            <div className="w-full h-[420px] rounded-lg overflow-hidden shadow-lg border border-border-light">
-              <img
-                src="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1200&q=80"
-                alt="Hamilton Hotel GT Road Lounge Interior"
-                className="w-full h-full object-cover"
-              />
-            </div>
-
-            <div className="absolute -bottom-6 right-6 bg-primary text-white p-5 rounded-lg border border-border-dark shadow-xl max-w-[240px]">
-              <div className="flex items-center gap-1.5 text-accent-gold font-serif font-semibold text-base mb-1">
-                <ShieldCheck size={16} />
-                <span>Prime GT Road Location</span>
-              </div>
-              <p className="text-xs text-slate-400 leading-snug">
-                Easy highway access with subterranean secure parking and fast check-in.
+              <p className="text-base font-semibold text-text-primary leading-relaxed mb-3">
+                {HOTEL_INFO.name} is a 45-room hotel built for travelers, road trips, and business guests visiting Hamilton along the GT Road corridor.
               </p>
+
+              <p className="text-sm sm:text-base text-text-secondary leading-relaxed mb-6">
+                We focus on what matters most on the road: clean rooms, hot showers, dependable generators so AC stays running without interruption, guarded parking, and hot fresh meals made to order.
+              </p>
+
+              {/* Stat-Chip Badges */}
+              <div className="flex flex-wrap items-center gap-2.5 mb-8">
+                <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-accent-blue bg-accent-blue-tint rounded-full border border-accent-blue/15">
+                  <BedDouble size={14} />
+                  <span>45 AC Guest Rooms</span>
+                </span>
+                <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-accent-gold bg-accent-gold-tint rounded-full border border-accent-gold/20">
+                  <Star size={14} className="fill-accent-gold" />
+                  <span>4.8 Guest Rating</span>
+                </span>
+                <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-accent-blue bg-accent-blue-tint rounded-full border border-accent-blue/15">
+                  <Zap size={14} />
+                  <span>24/7 Power Backup</span>
+                </span>
+                <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-text-primary bg-surface-warm rounded-full border border-border">
+                  <Shield size={14} />
+                  <span>Guarded GT Road Parking</span>
+                </span>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4 pt-6 border-t border-border/60">
+                <div>
+                  <div className="font-heading text-2xl sm:text-3xl font-bold text-accent-blue">45</div>
+                  <div className="text-xs font-semibold text-text-muted mt-0.5">Rooms</div>
+                </div>
+                <div>
+                  <div className="font-heading text-2xl sm:text-3xl font-bold text-accent-blue">24/7</div>
+                  <div className="text-xs font-semibold text-text-muted mt-0.5">Desk & Generator</div>
+                </div>
+                <div>
+                  <div className="font-heading text-2xl sm:text-3xl font-bold text-accent-blue">0%</div>
+                  <div className="text-xs font-semibold text-text-muted mt-0.5">Middleman Fee</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Image Column */}
+            <div className="lg:col-span-5 relative">
+              <div className="w-full h-[360px] sm:h-[400px] rounded-2xl overflow-hidden shadow-card border border-border/70 bg-surface-warm">
+                <img
+                  src="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1200&q=80"
+                  alt="Hamilton Hotel GT Road Lounge Interior"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+
+              {/* Floating Pill/Badge */}
+              <div className="absolute -bottom-4 right-4 sm:right-6 bg-white rounded-2xl p-4 shadow-elevated border border-border/70 max-w-[220px]">
+                <div className="flex items-center gap-1.5 text-accent-blue font-heading font-bold text-sm mb-0.5">
+                  <ShieldCheck size={16} />
+                  <span>Direct GT Road Access</span>
+                </div>
+                <p className="text-[11px] text-text-secondary leading-snug">
+                  Guarded on-site parking lot with instant highway pull-in.
+                </p>
+              </div>
             </div>
           </div>
         </div>

@@ -15,8 +15,8 @@ export interface GalleryItem {
 
 export const HOTEL_INFO = {
   name: "Hamilton Hotel & Suites",
-  subheading: "Boutique Residence & Dining",
-  tagline: "Refined comfort, tailored hospitality, and convenient access along GT Road, Hamilton, Pakistan.",
+  subheading: "45-Room Hotel & Dining on GT Road",
+  tagline: "Clean, comfortable rooms with 24/7 power backup and secure parking along GT Road, Hamilton, Pakistan.",
   phone: "+92 51 4900123",
   email: "reservations@hamiltonhotel.pk",
   address: "Hamilton, GT Road, Pakistan",
@@ -31,53 +31,53 @@ export const HOTEL_INFO = {
   checkOutTime: "12:00 PM",
   totalRooms: 45,
   guarantees: [
-    "Best Rate Direct Guarantee",
+    "Direct Booking Rate Guarantee",
     "Complimentary Breakfast Included",
-    "Flexible Cancellation Policy",
-    "Secure On-Site Parking & Power Backup"
+    "Flexible Free Cancellation",
+    "Secure On-Site Parking & 24/7 Generator Backup"
   ]
 };
 
 export const HOTEL_AMENITIES: HotelFeatureAmenity[] = [
   {
-    id: "wifi",
-    title: "High-Speed Wi-Fi",
-    description: "Complimentary fiber Wi-Fi across all guest rooms, business lounges, and dining areas.",
-    category: "service",
-    iconName: "Wifi"
+    id: "climate",
+    title: "24/7 Generator & Climate Control",
+    description: "Uninterrupted power supply with heavy-duty backup generators and individual split AC in every room.",
+    category: "comfort",
+    iconName: "Wind"
   },
   {
     id: "parking",
     title: "Secure On-Site Parking",
-    description: "Dedicated parking with 24/7 security surveillance and convenient access to GT Road.",
+    description: "Dedicated guarded parking lot with 24/7 security cameras and direct, easy pull-in from GT Road.",
     category: "service",
     iconName: "Car"
   },
   {
+    id: "wifi",
+    title: "High-Speed Fiber Wi-Fi",
+    description: "Reliable fiber internet access throughout all guest rooms, dining spaces, and front lobby.",
+    category: "service",
+    iconName: "Wifi"
+  },
+  {
     id: "dining",
-    title: "Hamilton Dining Restaurant",
-    description: "Serving fresh local and international cuisine, grilled specialties, and breakfast buffet.",
+    title: "Hamilton Kitchen & Dining",
+    description: "Freshly cooked local breakfast, daily lunch specials, and traditional Pakistani & continental dinner.",
     category: "dining",
     iconName: "Utensils"
   },
   {
     id: "roomservice",
-    title: "In-Room Dining",
-    description: "Freshly prepared meals and tea/coffee served directly to your room.",
+    title: "Room Service & Tea Bar",
+    description: "Fresh tea, coffee, snacks, and full meals delivered directly to your door until late night.",
     category: "dining",
     iconName: "Coffee"
   },
   {
-    id: "climate",
-    title: "Air Conditioning & Power Backup",
-    description: "Individual room climate control backed by uninterrupted generator support.",
-    category: "comfort",
-    iconName: "Wind"
-  },
-  {
     id: "concierge",
-    title: "Guest Concierge & Reception",
-    description: "Round-the-clock desk support, travel advice, and car hire assistance.",
+    title: "24-Hour Front Desk",
+    description: "Friendly front desk team available around the clock for check-ins, extra bedding, and local travel directions.",
     category: "service",
     iconName: "Compass"
   }

@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Calendar, Users, DoorOpen, Search, UserCheck } from "lucide-react";
-import { HOTEL_INFO } from "@/data/hotelInfo";
+import { ArrowRight } from "lucide-react";
 
 interface AvailabilitySearchProps {
   compact?: boolean;
@@ -20,8 +19,6 @@ export default function AvailabilitySearch({ compact = false }: AvailabilitySear
   const [checkIn, setCheckIn] = useState(today);
   const [checkOut, setCheckOut] = useState(tomorrow);
   const [adults, setAdults] = useState("2");
-  const [children, setChildren] = useState("0");
-  const [rooms, setRooms] = useState("1");
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,129 +26,82 @@ export default function AvailabilitySearch({ compact = false }: AvailabilitySear
       checkIn,
       checkOut,
       adults,
-      children,
-      rooms,
+      rooms: "1",
     }).toString();
     
     router.push(`/rooms?${query}`);
   };
 
   return (
-    <div className="bg-surface border border-border-light rounded-lg p-5 lg:p-6 shadow-xl relative z-10">
-      <form onSubmit={handleSearch} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 items-end">
-        {/* Check-In */}
-        <div className="flex flex-col gap-1.5">
-          <label className="text-[11px] font-semibold tracking-wider uppercase text-muted-text flex items-center gap-1">
-            <Calendar size={13} className="text-accent-gold" />
-            <span>Check-In</span>
-          </label>
-          <div className="relative flex items-center">
-            <Calendar size={16} className="absolute left-3 text-accent-gold pointer-events-none" />
+    <div className="bg-surface border border-border/80 rounded-2xl p-3 sm:p-4 md:p-5 lg:p-6 shadow-elevated relative z-20">
+      <form onSubmit={handleSearch} className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 md:gap-4 lg:gap-6">
+        {/* 3 Fields Container: Evenly-spaced columns with vertical dividers */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-border flex-1 items-center">
+          {/* Check-In Field */}
+          <div className="flex flex-col text-left px-2 sm:px-4 py-2 sm:py-0">
+            <span className="text-[10px] sm:text-[11px] font-bold tracking-wider uppercase text-text-muted mb-1 block">
+              CHECK-IN
+            </span>
             <input
               type="date"
               value={checkIn}
               min={today}
               onChange={(e) => setCheckIn(e.target.value)}
-              className="w-full pl-9 pr-3 py-2.5 text-sm font-medium text-primary bg-bg-warm border border-border-light rounded outline-none focus:border-accent-gold focus:bg-white transition-all"
+              className="w-full font-heading text-sm sm:text-base font-bold text-text-primary bg-transparent outline-none cursor-pointer p-0 border-0 focus:ring-0"
               required
             />
           </div>
-        </div>
 
-        {/* Check-Out */}
-        <div className="flex flex-col gap-1.5">
-          <label className="text-[11px] font-semibold tracking-wider uppercase text-muted-text flex items-center gap-1">
-            <Calendar size={13} className="text-accent-gold" />
-            <span>Check-Out</span>
-          </label>
-          <div className="relative flex items-center">
-            <Calendar size={16} className="absolute left-3 text-accent-gold pointer-events-none" />
+          {/* Check-Out Field */}
+          <div className="flex flex-col text-left px-2 sm:px-4 py-2 sm:py-0">
+            <span className="text-[10px] sm:text-[11px] font-bold tracking-wider uppercase text-text-muted mb-1 block">
+              CHECK-OUT
+            </span>
             <input
               type="date"
               value={checkOut}
               min={checkIn}
               onChange={(e) => setCheckOut(e.target.value)}
-              className="w-full pl-9 pr-3 py-2.5 text-sm font-medium text-primary bg-bg-warm border border-border-light rounded outline-none focus:border-accent-gold focus:bg-white transition-all"
+              className="w-full font-heading text-sm sm:text-base font-bold text-text-primary bg-transparent outline-none cursor-pointer p-0 border-0 focus:ring-0"
               required
             />
           </div>
-        </div>
 
-        {/* Adults */}
-        <div className="flex flex-col gap-1.5">
-          <label className="text-[11px] font-semibold tracking-wider uppercase text-muted-text flex items-center gap-1">
-            <Users size={13} className="text-accent-gold" />
-            <span>Adults</span>
-          </label>
-          <div className="relative flex items-center">
-            <Users size={16} className="absolute left-3 text-accent-gold pointer-events-none" />
+          {/* Guests Field */}
+          <div className="flex flex-col text-left px-2 sm:px-4 py-2 sm:py-0">
+            <span className="text-[10px] sm:text-[11px] font-bold tracking-wider uppercase text-text-muted mb-1 block">
+              GUESTS
+            </span>
             <select
               value={adults}
               onChange={(e) => setAdults(e.target.value)}
-              className="w-full pl-9 pr-3 py-2.5 text-sm font-medium text-primary bg-bg-warm border border-border-light rounded outline-none focus:border-accent-gold focus:bg-white transition-all cursor-pointer appearance-none"
+              className="w-full font-heading text-sm sm:text-base font-bold text-text-primary bg-transparent outline-none cursor-pointer p-0 border-0 focus:ring-0 appearance-none"
             >
-              <option value="1">1 Adult</option>
-              <option value="2">2 Adults</option>
-              <option value="3">3 Adults</option>
-              <option value="4">4 Adults</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Children */}
-        <div className="flex flex-col gap-1.5">
-          <label className="text-[11px] font-semibold tracking-wider uppercase text-muted-text flex items-center gap-1">
-            <UserCheck size={13} className="text-accent-gold" />
-            <span>Children</span>
-          </label>
-          <div className="relative flex items-center">
-            <UserCheck size={16} className="absolute left-3 text-accent-gold pointer-events-none" />
-            <select
-              value={children}
-              onChange={(e) => setChildren(e.target.value)}
-              className="w-full pl-9 pr-3 py-2.5 text-sm font-medium text-primary bg-bg-warm border border-border-light rounded outline-none focus:border-accent-gold focus:bg-white transition-all cursor-pointer appearance-none"
-            >
-              <option value="0">0 Children</option>
-              <option value="1">1 Child</option>
-              <option value="2">2 Children</option>
-              <option value="3">3 Children</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Rooms */}
-        <div className="flex flex-col gap-1.5">
-          <label className="text-[11px] font-semibold tracking-wider uppercase text-muted-text flex items-center gap-1">
-            <DoorOpen size={13} className="text-accent-gold" />
-            <span>Rooms</span>
-          </label>
-          <div className="relative flex items-center">
-            <DoorOpen size={16} className="absolute left-3 text-accent-gold pointer-events-none" />
-            <select
-              value={rooms}
-              onChange={(e) => setRooms(e.target.value)}
-              className="w-full pl-9 pr-3 py-2.5 text-sm font-medium text-primary bg-bg-warm border border-border-light rounded outline-none focus:border-accent-gold focus:bg-white transition-all cursor-pointer appearance-none"
-            >
-              <option value="1">1 Room</option>
-              <option value="2">2 Rooms</option>
-              <option value="3">3 Rooms</option>
+              <option value="1">1 adult</option>
+              <option value="2">2 adults</option>
+              <option value="3">3 adults</option>
+              <option value="4">4 adults</option>
+              <option value="family">Family (2+2)</option>
             </select>
           </div>
         </div>
 
         {/* Search CTA Button */}
-        <div>
-          <button type="submit" className="w-full h-11 flex items-center justify-center gap-2 text-sm font-semibold text-white bg-accent-gold hover:bg-gold-hover rounded transition-all shadow-sm cursor-pointer">
-            <Search size={16} />
-            <span>Search Rooms</span>
+        <div className="md:pl-2 shrink-0">
+          <button
+            type="submit"
+            className="w-full md:w-auto h-12 px-7 sm:px-8 flex items-center justify-center gap-2 text-sm font-bold text-white bg-accent-blue hover:bg-accent-blue-hover rounded-full transition-all duration-200 shadow-sm hover:shadow-md cursor-pointer active:scale-[0.98]"
+          >
+            <span>Search</span>
+            <ArrowRight size={16} />
           </button>
         </div>
       </form>
 
       {!compact && (
-        <div className="mt-4 pt-3 border-t border-dashed border-border-light flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted-text">
-          <span>Direct booking rate code: <strong className="text-primary">DIRECT-PKR</strong></span>
-          <span className="text-accent-gold font-semibold">&bull; Complimentary breakfast included with all rooms</span>
+        <div className="mt-3 pt-3 border-t border-border/60 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] sm:text-xs text-text-muted">
+          <span>Official Direct Rate: <strong className="text-text-primary font-semibold">DIRECT-PKR</strong></span>
+          <span className="text-accent-blue font-medium">&bull; Free breakfast and flexible cancellation included</span>
         </div>
       )}
     </div>
