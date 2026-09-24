@@ -130,7 +130,7 @@ export default function Footer() {
 
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-border flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-text-muted">
-          <div>
+          <div suppressHydrationWarning>
             © {new Date().getFullYear()} {HOTEL_INFO.name}, {HOTEL_INFO.address}. All rights reserved.
           </div>
           <div className="flex items-center gap-2.5">

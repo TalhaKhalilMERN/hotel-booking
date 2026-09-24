@@ -4,7 +4,7 @@ import { HOTEL_INFO } from "@/data/hotelInfo";
  * Formats a monetary amount into the configured currency format (e.g. Rs. 8,500)
  */
 export function formatCurrency(amount: number): string {
-  const formattedNumber = amount.toLocaleString("en-PK");
+  const formattedNumber = amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   return `${HOTEL_INFO.currencySymbol} ${formattedNumber}`;
 }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 
@@ -10,15 +10,26 @@ interface AvailabilitySearchProps {
 
 export default function AvailabilitySearch({ compact = false }: AvailabilitySearchProps) {
   const router = useRouter();
-  const today = new Date().toISOString().split("T")[0];
-  
-  const tomorrowObj = new Date();
-  tomorrowObj.setDate(tomorrowObj.getDate() + 2);
-  const tomorrow = tomorrowObj.toISOString().split("T")[0];
 
-  const [checkIn, setCheckIn] = useState(today);
-  const [checkOut, setCheckOut] = useState(tomorrow);
+  // Initialize as empty strings so server and client render identically on first pass.
+  // useEffect computes real dates only after hydration completes on the client.
+  const [checkIn, setCheckIn] = useState("");
+  const [checkOut, setCheckOut] = useState("");
   const [adults, setAdults] = useState("2");
+
+  useEffect(() => {
+    const todayDate = new Date();
+    const checkOutDate = new Date();
+    checkOutDate.setDate(todayDate.getDate() + 2);
+
+    setCheckIn(todayDate.toISOString().split("T")[0]);
+    setCheckOut(checkOutDate.toISOString().split("T")[0]);
+  }, []);
+
+  // Derived today string for the `min` attribute — safe because this also
+  // runs on the client (inside a "use client" component, attributes are
+  // only meaningful after hydration anyway).
+  const todayMin = checkIn || undefined;
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,7 +39,7 @@ export default function AvailabilitySearch({ compact = false }: AvailabilitySear
       adults,
       rooms: "1",
     }).toString();
-    
+
     router.push(`/rooms?${query}`);
   };
 
@@ -45,7 +56,7 @@ export default function AvailabilitySearch({ compact = false }: AvailabilitySear
             <input
               type="date"
               value={checkIn}
-              min={today}
+              min={todayMin}
               onChange={(e) => setCheckIn(e.target.value)}
               className="w-full font-heading text-sm sm:text-base font-bold text-text-primary bg-transparent outline-none cursor-pointer p-0 border-0 focus:ring-0"
               required
@@ -60,7 +71,7 @@ export default function AvailabilitySearch({ compact = false }: AvailabilitySear
             <input
               type="date"
               value={checkOut}
-              min={checkIn}
+              min={checkIn || undefined}
               onChange={(e) => setCheckOut(e.target.value)}
               className="w-full font-heading text-sm sm:text-base font-bold text-text-primary bg-transparent outline-none cursor-pointer p-0 border-0 focus:ring-0"
               required

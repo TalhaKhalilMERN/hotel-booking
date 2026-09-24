@@ -30,8 +30,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${manrope.variable} ${inter.variable}`}>
-      <body className="font-sans antialiased bg-bg text-text-primary min-h-screen flex flex-col">
+    <html lang="en" className={`${manrope.variable} ${inter.variable}`} suppressHydrationWarning>
+      <body className="font-sans antialiased bg-bg text-text-primary min-h-screen flex flex-col" suppressHydrationWarning>
         <Header />
         <main className="flex-1">
           {children}
