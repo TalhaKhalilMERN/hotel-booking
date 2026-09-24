@@ -87,15 +87,15 @@ export default function RoomsPage() {
           </span>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch relative">
           {/* Left Filter Sidebar */}
           <aside
             className={`lg:col-span-4 xl:col-span-3 ${
               mobileFilterOpen ? "block" : "hidden lg:block"
-            }`}
+            } relative h-full`}
           >
-            <div className="card-base p-6 rounded-2xl bg-white border border-border/70 shadow-sm sticky top-24 space-y-6">
-              <div className="flex items-center justify-between pb-4 border-b border-border/70">
+            <div className="card-base p-5 rounded-2xl bg-white border border-border/70 shadow-sm sticky top-24 space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-border/70">
                 <div className="flex items-center gap-2 font-heading font-bold text-base text-text-primary">
                   <Filter size={16} className="text-accent-blue" />
                   <span>Filter Results</span>
@@ -114,12 +114,12 @@ export default function RoomsPage() {
 
               {/* Price Range Filter */}
               <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className="text-xs font-bold uppercase tracking-wider text-text-muted">
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-[11px] font-bold uppercase tracking-wider text-text-muted">
                     Max Price Per Night
                   </label>
                   <span className="text-xs font-bold text-accent-blue">
-                    Rs. {maxPrice.toLocaleString()}
+                    Rs. {maxPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
                   </span>
                 </div>
                 <input
@@ -129,7 +129,7 @@ export default function RoomsPage() {
                   step="500"
                   value={maxPrice}
                   onChange={(e) => setMaxPrice(parseInt(e.target.value))}
-                  className="w-full accent-accent-blue cursor-pointer"
+                  className="w-full accent-accent-blue cursor-pointer h-2 bg-surface-warm rounded-lg"
                 />
                 <div className="flex justify-between text-[11px] text-text-muted mt-1">
                   <span>Rs. 8,500</span>
@@ -139,10 +139,10 @@ export default function RoomsPage() {
 
               {/* Bed Type */}
               <div className="pt-2 border-t border-border/60">
-                <label className="text-xs font-bold uppercase tracking-wider text-text-muted block mb-2.5">
+                <label className="text-[11px] font-bold uppercase tracking-wider text-text-muted block mb-2">
                   Bedding Type
                 </label>
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-1.5">
                   {[
                     { id: "all", label: "All Bed Types" },
                     { id: "king", label: "King Bed" },
@@ -151,7 +151,7 @@ export default function RoomsPage() {
                     <button
                       key={item.id}
                       onClick={() => setBedType(item.id)}
-                      className={`text-left text-xs font-medium px-3 py-2 rounded-xl transition-all flex items-center justify-between cursor-pointer ${
+                      className={`text-left text-xs font-medium px-3 py-1.5 rounded-xl transition-all flex items-center justify-between cursor-pointer ${
                         bedType === item.id
                           ? "bg-accent-blue-tint text-accent-blue font-bold"
                           : "text-text-secondary hover:bg-surface-warm"
@@ -166,7 +166,7 @@ export default function RoomsPage() {
 
               {/* Guests Count */}
               <div className="pt-2 border-t border-border/60">
-                <label className="text-xs font-bold uppercase tracking-wider text-text-muted block mb-2.5">
+                <label className="text-[11px] font-bold uppercase tracking-wider text-text-muted block mb-2">
                   Min Guests
                 </label>
                 <div className="grid grid-cols-3 gap-1.5">
@@ -178,7 +178,7 @@ export default function RoomsPage() {
                     <button
                       key={item.id}
                       onClick={() => setGuestCount(item.id)}
-                      className={`text-center text-xs py-2 rounded-xl border transition-all cursor-pointer font-semibold ${
+                      className={`text-center text-xs py-1.5 rounded-xl border transition-all cursor-pointer font-semibold ${
                         guestCount === item.id
                           ? "bg-accent-blue text-white border-accent-blue shadow-xs"
                           : "bg-surface-warm text-text-secondary border-border hover:border-accent-blue/40"
@@ -192,10 +192,10 @@ export default function RoomsPage() {
 
               {/* Room View */}
               <div className="pt-2 border-t border-border/60">
-                <label className="text-xs font-bold uppercase tracking-wider text-text-muted block mb-2.5">
+                <label className="text-[11px] font-bold uppercase tracking-wider text-text-muted block mb-2">
                   Room View
                 </label>
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-1.5">
                   {[
                     { id: "all", label: "All Views" },
                     { id: "gt road", label: "GT Road Avenue View" },
@@ -204,7 +204,7 @@ export default function RoomsPage() {
                     <button
                       key={item.id}
                       onClick={() => setViewFilter(item.id)}
-                      className={`text-left text-xs font-medium px-3 py-2 rounded-xl transition-all flex items-center justify-between cursor-pointer ${
+                      className={`text-left text-xs font-medium px-3 py-1.5 rounded-xl transition-all flex items-center justify-between cursor-pointer ${
                         viewFilter === item.id
                           ? "bg-accent-blue-tint text-accent-blue font-bold"
                           : "text-text-secondary hover:bg-surface-warm"
