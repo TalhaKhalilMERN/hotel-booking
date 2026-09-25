@@ -38,13 +38,13 @@ export default async function RoomDetailPage({ params }: RoomDetailPageProps) {
 
         {/* Gallery Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10 h-auto md:h-[460px]">
-          <div className="md:col-span-2 h-full rounded-2xl overflow-hidden shadow-card border border-border/70 bg-surface-warm">
-            <img src={room.images[0] || room.heroImage} alt={room.name} className="w-full h-full object-cover" />
+          <div className="md:col-span-2 relative min-h-0 h-[280px] sm:h-[360px] md:h-full rounded-2xl overflow-hidden shadow-card border border-border/70 bg-surface-warm">
+            <img src={room.images[0] || room.heroImage} alt={room.name} className="absolute inset-0 w-full h-full object-cover" />
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-1 gap-4 h-full">
+          <div className="flex flex-row md:flex-col gap-4 h-[140px] sm:h-[180px] md:h-full">
             {(room.images.slice(1, 3).length > 0 ? room.images.slice(1, 3) : [room.heroImage, room.heroImage]).map((img, idx) => (
-              <div key={idx} className="h-full min-h-[140px] rounded-2xl overflow-hidden shadow-xs border border-border/70 bg-surface-warm group">
-                <img src={img} alt={`${room.name} detail ${idx + 1}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+              <div key={idx} className="flex-1 relative min-h-0 h-full md:h-0 rounded-2xl overflow-hidden shadow-xs border border-border/70 bg-surface-warm group">
+                <img src={img} alt={`${room.name} detail ${idx + 1}`} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
               </div>
             ))}
           </div>
