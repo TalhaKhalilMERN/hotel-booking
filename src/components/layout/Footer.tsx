@@ -49,7 +49,7 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/#about" className="hover:text-accent-blue hover:translate-x-1 inline-block transition-all">
+                <Link href="/about" className="hover:text-accent-blue hover:translate-x-1 inline-block transition-all">
                   About Us
                 </Link>
               </li>
@@ -59,8 +59,8 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/#location" className="hover:text-accent-blue hover:translate-x-1 inline-block transition-all">
-                  Location & Map
+                <Link href="/contact" className="hover:text-accent-blue hover:translate-x-1 inline-block transition-all">
+                  Contact & Map
                 </Link>
               </li>
             </ul>

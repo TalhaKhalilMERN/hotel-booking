@@ -119,6 +119,7 @@ export default async function RoomDetailPage({ params }: RoomDetailPageProps) {
             <RoomBookingSidebar
               roomName={room.name}
               pricePerNight={room.pricePerNight}
+              roomId={room.id}
             />
           </div>
         </div>

@@ -3,9 +3,13 @@
 import { useState, useMemo } from "react";
 import { ROOMS_DATA } from "@/data/rooms";
 import RoomCard from "@/components/rooms/RoomCard";
+import EmptyState from "@/components/ui/EmptyState";
+import ErrorState from "@/components/ui/ErrorState";
+import { RoomsSkeleton } from "@/components/ui/RoomCardSkeleton";
 import { Filter, RotateCcw, SlidersHorizontal, ChevronDown, Check } from "lucide-react";
 
 export default function RoomsPage() {
+  const [status, setStatus] = useState<"idle" | "loading" | "empty" | "error" | "success">("idle");
   const [bedType, setBedType] = useState<string>("all");
   const [guestCount, setGuestCount] = useState<string>("all");
   const [maxPrice, setMaxPrice] = useState<number>(25000);
@@ -229,19 +233,13 @@ export default function RoomsPage() {
               <span className="text-accent-blue font-medium">Direct Booking Guarantee &bull; PKR</span>
             </div>
 
-            {/* Room List Cards */}
-            {filteredRooms.length === 0 ? (
-              <div className="card-base p-12 text-center rounded-2xl bg-white border border-border/70">
-                <h3 className="font-heading text-lg font-bold text-text-primary mb-2">
-                  No rooms match your filter criteria
-                </h3>
-                <p className="text-sm text-text-secondary mb-5">
-                  Try adjusting your price range, bedding type, or view preferences.
-                </p>
-                <button onClick={resetFilters} className="btn-primary text-xs px-5 py-2.5">
-                  Reset All Filters
-                </button>
-              </div>
+            {/* Room List Cards & UI States */}
+            {status === "loading" ? (
+              <RoomsSkeleton />
+            ) : status === "error" ? (
+              <ErrorState onRetry={() => setStatus("idle")} />
+            ) : filteredRooms.length === 0 ? (
+              <EmptyState onAction={resetFilters} />
             ) : (
               filteredRooms.map((room) => (
                 <RoomCard key={room.id} room={room} horizontal={true} />

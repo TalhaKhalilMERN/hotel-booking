@@ -1,15 +1,17 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { formatCurrency } from "@/utils/formatters";
 import { Calendar, ShieldCheck } from "lucide-react";
 
 interface RoomBookingSidebarProps {
   roomName: string;
   pricePerNight: number;
+  roomId?: string;
 }
 
-export default function RoomBookingSidebar({ roomName, pricePerNight }: RoomBookingSidebarProps) {
+export default function RoomBookingSidebar({ roomName, pricePerNight, roomId = "dlx-02" }: RoomBookingSidebarProps) {
   // Start as empty strings — server and client render identically ("empty").
   // useEffect sets the real dates only after hydration on the client.
   const [checkIn, setCheckIn] = useState("");
@@ -86,10 +88,13 @@ export default function RoomBookingSidebar({ roomName, pricePerNight }: RoomBook
         </div>
       </div>
 
-      <button className="btn-primary w-full py-3.5 text-sm font-bold flex items-center justify-center gap-2 shadow-sm hover:shadow-md">
+      <Link
+        href={`/rooms/${roomId}/book`}
+        className="btn-primary w-full py-3.5 text-sm font-bold flex items-center justify-center gap-2 shadow-sm hover:shadow-md"
+      >
         <Calendar size={17} />
         <span>Reserve {roomName}</span>
-      </button>
+      </Link>
 
       <div className="bg-surface-warm border border-border/70 rounded-xl p-4 flex flex-col gap-1.5 text-xs text-text-secondary">
         <div className="flex items-center gap-1.5 font-bold text-text-primary">

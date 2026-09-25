@@ -45,14 +45,14 @@ export default function Header() {
           <Link href="/#amenities" className="text-sm font-medium text-text-secondary hover:text-accent-blue transition-colors py-1">
             Amenities
           </Link>
-          <Link href="/#about" className="text-sm font-medium text-text-secondary hover:text-accent-blue transition-colors py-1">
+          <Link href="/about" className="text-sm font-medium text-text-secondary hover:text-accent-blue transition-colors py-1">
             About Us
           </Link>
           <Link href="/#gallery" className="text-sm font-medium text-text-secondary hover:text-accent-blue transition-colors py-1">
             Gallery
           </Link>
-          <Link href="/#location" className="text-sm font-medium text-text-secondary hover:text-accent-blue transition-colors py-1">
-            Location
+          <Link href="/contact" className="text-sm font-medium text-text-secondary hover:text-accent-blue transition-colors py-1">
+            Contact & Location
           </Link>
         </nav>
 
@@ -89,14 +89,14 @@ export default function Header() {
           <Link href="/#amenities" className="text-sm font-medium text-text-primary py-2 border-b border-border/60 hover:text-accent-blue" onClick={closeMobileMenu}>
             Amenities
           </Link>
-          <Link href="/#about" className="text-sm font-medium text-text-primary py-2 border-b border-border/60 hover:text-accent-blue" onClick={closeMobileMenu}>
+          <Link href="/about" className="text-sm font-medium text-text-primary py-2 border-b border-border/60 hover:text-accent-blue" onClick={closeMobileMenu}>
             About Us
           </Link>
           <Link href="/#gallery" className="text-sm font-medium text-text-primary py-2 border-b border-border/60 hover:text-accent-blue" onClick={closeMobileMenu}>
             Gallery
           </Link>
-          <Link href="/#location" className="text-sm font-medium text-text-primary py-2 border-b border-border/60 hover:text-accent-blue" onClick={closeMobileMenu}>
-            Location & Directions
+          <Link href="/contact" className="text-sm font-medium text-text-primary py-2 border-b border-border/60 hover:text-accent-blue" onClick={closeMobileMenu}>
+            Contact & Location
           </Link>
         </div>
       )}
