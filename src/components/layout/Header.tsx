@@ -1,12 +1,57 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { HOTEL_INFO } from "@/data/hotelInfo";
 import { Menu, X, Calendar } from "lucide-react";
 
 export default function Header() {
+  const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState<string>("");
+
+  // Track in-page anchor sections (Amenities, Gallery) when on the homepage
+  useEffect(() => {
+    if (pathname !== "/") {
+      setActiveSection("");
+      return;
+    }
+
+    const observerCallback: IntersectionObserverCallback = (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          setActiveSection(entry.target.id);
+        }
+      });
+    };
+
+    const observerOptions: IntersectionObserverInit = {
+      root: null,
+      rootMargin: "-20% 0px -40% 0px",
+      threshold: 0.2,
+    };
+
+    const observer = new IntersectionObserver(observerCallback, observerOptions);
+    const sections = ["amenities", "gallery"]
+      .map((id) => document.getElementById(id))
+      .filter(Boolean) as HTMLElement[];
+
+    sections.forEach((sec) => observer.observe(sec));
+
+    const handleScroll = () => {
+      if (window.scrollY < 200) {
+        setActiveSection("");
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [pathname]);
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen((prev) => !prev);
@@ -15,6 +60,23 @@ export default function Header() {
   const closeMobileMenu = () => {
     setMobileMenuOpen(false);
   };
+
+  // Determine active route or section
+  const isHomeActive = pathname === "/" && activeSection === "";
+  const isRoomsActive = pathname.startsWith("/rooms");
+  const isAmenitiesActive = pathname === "/" && activeSection === "amenities";
+  const isAboutActive = pathname === "/about";
+  const isGalleryActive = pathname === "/" && activeSection === "gallery";
+  const isContactActive = pathname === "/contact";
+
+  const navItems = [
+    { href: "/", label: "Home", isActive: isHomeActive },
+    { href: "/rooms", label: "Rooms & Suites", isActive: isRoomsActive },
+    { href: "/#amenities", label: "Amenities", isActive: isAmenitiesActive },
+    { href: "/about", label: "About Us", isActive: isAboutActive },
+    { href: "/#gallery", label: "Gallery", isActive: isGalleryActive },
+    { href: "/contact", label: "Contact & Location", isActive: isContactActive },
+  ];
 
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-border transition-all duration-200">
@@ -36,24 +98,25 @@ export default function Header() {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-7">
-          <Link href="/" className="text-sm font-medium text-text-secondary hover:text-accent-blue transition-colors py-1">
-            Home
-          </Link>
-          <Link href="/rooms" className="text-sm font-medium text-text-secondary hover:text-accent-blue transition-colors py-1">
-            Rooms & Suites
-          </Link>
-          <Link href="/#amenities" className="text-sm font-medium text-text-secondary hover:text-accent-blue transition-colors py-1">
-            Amenities
-          </Link>
-          <Link href="/about" className="text-sm font-medium text-text-secondary hover:text-accent-blue transition-colors py-1">
-            About Us
-          </Link>
-          <Link href="/#gallery" className="text-sm font-medium text-text-secondary hover:text-accent-blue transition-colors py-1">
-            Gallery
-          </Link>
-          <Link href="/contact" className="text-sm font-medium text-text-secondary hover:text-accent-blue transition-colors py-1">
-            Contact & Location
-          </Link>
+          {navItems.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`relative text-sm font-medium py-1 transition-colors duration-200 ${
+                item.isActive
+                  ? "text-accent-blue"
+                  : "text-text-secondary hover:text-accent-blue"
+              }`}
+            >
+              <span>{item.label}</span>
+              {/* Active Underline Indicator */}
+              <span
+                className={`absolute bottom-0 left-0 right-0 h-[2px] bg-accent-blue rounded-full transition-all duration-200 ${
+                  item.isActive ? "opacity-100 scale-x-100" : "opacity-0 scale-x-0"
+                }`}
+              />
+            </Link>
+          ))}
         </nav>
 
         {/* CTA & Mobile Toggle */}
@@ -79,25 +142,24 @@ export default function Header() {
 
       {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-white border-b border-border px-6 py-5 flex flex-col gap-3 shadow-lg animate-in slide-in-from-top-2 duration-200">
-          <Link href="/" className="text-sm font-medium text-text-primary py-2 border-b border-border/60 hover:text-accent-blue" onClick={closeMobileMenu}>
-            Home
-          </Link>
-          <Link href="/rooms" className="text-sm font-medium text-text-primary py-2 border-b border-border/60 hover:text-accent-blue" onClick={closeMobileMenu}>
-            Rooms & Suites
-          </Link>
-          <Link href="/#amenities" className="text-sm font-medium text-text-primary py-2 border-b border-border/60 hover:text-accent-blue" onClick={closeMobileMenu}>
-            Amenities
-          </Link>
-          <Link href="/about" className="text-sm font-medium text-text-primary py-2 border-b border-border/60 hover:text-accent-blue" onClick={closeMobileMenu}>
-            About Us
-          </Link>
-          <Link href="/#gallery" className="text-sm font-medium text-text-primary py-2 border-b border-border/60 hover:text-accent-blue" onClick={closeMobileMenu}>
-            Gallery
-          </Link>
-          <Link href="/contact" className="text-sm font-medium text-text-primary py-2 border-b border-border/60 hover:text-accent-blue" onClick={closeMobileMenu}>
-            Contact & Location
-          </Link>
+        <div className="md:hidden bg-white border-b border-border px-6 py-4 flex flex-col gap-1.5 shadow-lg animate-in slide-in-from-top-2 duration-200">
+          {navItems.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              onClick={closeMobileMenu}
+              className={`relative flex items-center justify-between text-sm font-medium py-2.5 px-3.5 rounded-xl transition-all duration-200 ${
+                item.isActive
+                  ? "text-accent-blue bg-accent-blue-tint/50"
+                  : "text-text-primary hover:text-accent-blue hover:bg-surface-warm"
+              }`}
+            >
+              <span>{item.label}</span>
+              {item.isActive && (
+                <span className="w-1.5 h-4 bg-accent-blue rounded-full shrink-0" />
+              )}
+            </Link>
+          ))}
         </div>
       )}
     </header>
