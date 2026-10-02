@@ -1,0 +1,101 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Hotel {
+  id          String     @id @default(uuid())
+  name        String
+  address     String
+  city        String
+  country     String
+  description String?
+  roomTypes   RoomType[]
+  rooms       Room[]
+  createdAt   DateTime   @default(now())
+}
+
+model RoomType {
+  id               String            @id @default(uuid())
+  hotelId          String
+  hotel            Hotel             @relation(fields: [hotelId], references: [id])
+  name             String
+  description      String?
+  basePrice        Decimal
+  capacityAdults   Int
+  capacityChildren Int
+  sizeSqm          Float?
+  bedConfig        String?
+  rooms            Room[]
+  amenities        RoomTypeAmenity[]
+  createdAt        DateTime          @default(now())
+}
+
+model Room {
+  id         String     @id @default(uuid())
+  hotelId    String
+  hotel      Hotel      @relation(fields: [hotelId], references: [id])
+  roomTypeId String
+  roomType   RoomType   @relation(fields: [roomTypeId], references: [id])
+  roomNumber String
+  floor      Int?
+  status     RoomStatus @default(AVAILABLE)
+  bookings   Booking[]
+}
+
+enum RoomStatus {
+  AVAILABLE
+  MAINTENANCE
+  INACTIVE
+}
+
+model Amenity {
+  id        String            @id @default(uuid())
+  name      String
+  iconKey   String?
+  roomTypes RoomTypeAmenity[]
+}
+
+model RoomTypeAmenity {
+  roomTypeId String
+  roomType   RoomType @relation(fields: [roomTypeId], references: [id])
+  amenityId  String
+  amenity    Amenity  @relation(fields: [amenityId], references: [id])
+
+  @@id([roomTypeId, amenityId])
+}
+
+model Guest {
+  id        String    @id @default(uuid())
+  name      String
+  email     String
+  phone     String?
+  bookings  Booking[]
+  createdAt DateTime  @default(now())
+}
+
+model Booking {
+  id               String        @id @default(uuid())
+  guestId          String
+  guest            Guest         @relation(fields: [guestId], references: [id])
+  roomId           String
+  room             Room          @relation(fields: [roomId], references: [id])
+  checkIn          DateTime
+  checkOut         DateTime
+  adults           Int
+  children         Int           @default(0)
+  status           BookingStatus @default(PENDING)
+  totalPrice       Decimal
+  bookingReference String        @unique
+  createdAt        DateTime      @default(now())
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}

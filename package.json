@@ -1,25 +1,18 @@
 {
-  "name": "hotel-booking",
-  "version": "0.1.0",
+  "name": "hamilton-hotel-monorepo",
+  "version": "1.0.0",
   "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start"
-  },
-  "dependencies": {
-    "lucide-react": "^1.47.0",
-    "next": "16.3.5",
-    "react": "19.2.8",
-    "react-dom": "19.2.8"
-  },
-  "devDependencies": {
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "autoprefixer": "^10.6.1",
-    "postcss": "^8.5.28",
-    "tailwindcss": "^3.4.19",
-    "typescript": "^5"
+    "dev:web": "npm run dev --workspace=web",
+    "build:web": "npm run build --workspace=web",
+    "dev:api": "npm run start:dev --workspace=api",
+    "build:api": "npm run build --workspace=api",
+    "db:up": "docker-compose up -d",
+    "db:down": "docker-compose down",
+    "db:migrate": "npm run prisma:migrate --workspace=api",
+    "db:seed": "npm run prisma:seed --workspace=api"
   }
 }
