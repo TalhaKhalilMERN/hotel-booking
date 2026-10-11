@@ -1,34 +1,75 @@
-import { PrismaClient, RoomStatus } from "@prisma/client";
+/**
+ * Prisma seed for Hamilton Hotel & Suites
+ *
+ * Seeds:
+ *  - 1 Hotel
+ *  - 6 Amenities
+ *  - 4 RoomTypes  (Classic King, Deluxe Executive, Hamilton Master Suite, Family Twin)
+ *  - 16 physical Rooms  (4 per room type)
+ *  - 1 demo admin User  (password: Admin1234!)
+ *  - 1 demo customer User  (password: Guest1234!)
+ *
+ * No bookings are seeded — real bookings will be created via the API.
+ */
+
+import { PrismaClient, RoomStatus, UserRole } from "@prisma/client";
+import * as crypto from "crypto";
 
 const prisma = new PrismaClient();
 
-async function main() {
-  console.log("Seeding database for Hamilton Hotel & Suites...");
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
 
-  // Clear existing data in reverse order of dependencies
+/**
+ * Produces a SHA-256 hex digest of the password.
+ *
+ * NOTE: SHA-256 is used here only for seeding demo/test accounts so that
+ * no additional npm package is required in the seed script.
+ * The real authentication layer MUST use bcrypt (cost ≥ 12) or Argon2.
+ * Never use SHA-256 for production passwords.
+ */
+function hashPassword(plain: string): string {
+  return crypto.createHash("sha256").update(plain).digest("hex");
+}
+
+// ---------------------------------------------------------------------------
+// Main
+// ---------------------------------------------------------------------------
+
+async function main() {
+  console.log("🌱  Seeding Hamilton Hotel & Suites...\n");
+
+  // ── 1. Wipe existing data (reverse dependency order) ─────────────────────
+  await prisma.bookingGuest.deleteMany();
+  await prisma.bookingRoom.deleteMany();
   await prisma.booking.deleteMany();
-  await prisma.guest.deleteMany();
+  await prisma.user.deleteMany();
   await prisma.room.deleteMany();
   await prisma.roomTypeAmenity.deleteMany();
   await prisma.amenity.deleteMany();
   await prisma.roomType.deleteMany();
   await prisma.hotel.deleteMany();
 
-  // 1. Create Hotel
+  console.log("  ✓  Cleared existing data");
+
+  // ── 2. Hotel ──────────────────────────────────────────────────────────────
   const hotel = await prisma.hotel.create({
     data: {
       name: "Hamilton Hotel & Suites",
-      address: "Hamilton, GT Road",
+      address: "GT Road",
       city: "Hamilton",
       country: "Pakistan",
+      timezone: "Asia/Karachi",
+      currency: "PKR",
       description:
         "Clean, comfortable rooms with 24/7 power backup and secure parking along GT Road, Hamilton, Pakistan.",
     },
   });
 
-  console.log(`Created Hotel: ${hotel.name} (${hotel.id})`);
+  console.log(`  ✓  Hotel: ${hotel.name}  (${hotel.id})`);
 
-  // 2. Create Amenities
+  // ── 3. Amenities ─────────────────────────────────────────────────────────
   const amenityData = [
     { name: "High-Speed Wi-Fi", iconKey: "Wifi" },
     { name: "Air Conditioning & Generator Backup", iconKey: "Wind" },
@@ -38,29 +79,28 @@ async function main() {
     { name: "Room Service & Tea Bar", iconKey: "Coffee" },
   ];
 
-  const createdAmenities: Record<string, string> = {};
+  const amenityMap: Record<string, string> = {}; // name → id
+
   for (const item of amenityData) {
-    const amenity = await prisma.amenity.create({
-      data: item,
-    });
-    createdAmenities[item.name] = amenity.id;
+    const amenity = await prisma.amenity.create({ data: item });
+    amenityMap[item.name] = amenity.id;
   }
 
-  console.log(`Created ${Object.keys(createdAmenities).length} Amenities.`);
+  console.log(`  ✓  ${amenityData.length} amenities created`);
 
-  // 3. Create Room Types & Physical Rooms
-  const roomTypesData = [
+  // ── 4. Room Types & physical Rooms ────────────────────────────────────────
+  const roomTypesConfig = [
     {
       name: "Classic King Room",
       description:
-        "Features a comfortable king-size bed, workstation, high-speed Wi-Fi, and modern ensuite shower room with GT Road access.",
+        "Comfortable king-size bed, workstation, high-speed Wi-Fi, and modern ensuite shower with GT Road views.",
       basePrice: 8500,
       capacityAdults: 2,
       capacityChildren: 1,
       sizeSqm: 30,
       bedConfig: "1 King Bed",
-      roomNumbers: ["101", "102", "103", "104"],
       floor: 1,
+      roomNumbers: ["101", "102", "103", "104"],
       amenityNames: [
         "High-Speed Wi-Fi",
         "Air Conditioning & Generator Backup",
@@ -71,14 +111,14 @@ async function main() {
     {
       name: "Deluxe Executive Room",
       description:
-        "Offers additional floor space, seating sofa, enlarged bathroom, and tea/coffee station for enhanced comfort.",
+        "Extra floor space, seating sofa, enlarged bathroom, and tea/coffee station for enhanced business comfort.",
       basePrice: 12000,
       capacityAdults: 2,
       capacityChildren: 2,
       sizeSqm: 40,
       bedConfig: "1 Super King Bed",
-      roomNumbers: ["201", "202", "203", "204"],
       floor: 2,
+      roomNumbers: ["201", "202", "203", "204"],
       amenityNames: [
         "High-Speed Wi-Fi",
         "Air Conditioning & Generator Backup",
@@ -90,14 +130,14 @@ async function main() {
     {
       name: "Hamilton Master Suite",
       description:
-        "A spacious residence suite with separate lounge room, dining table, master bedroom, and luxury bathroom amenities.",
+        "Spacious suite with separate lounge, dining table, master bedroom, and luxury bathroom amenities.",
       basePrice: 16500,
       capacityAdults: 3,
       capacityChildren: 2,
       sizeSqm: 58,
       bedConfig: "1 Emperor King Bed + Lounge Sofa",
-      roomNumbers: ["301", "302", "303", "304"],
       floor: 3,
+      roomNumbers: ["301", "302", "303", "304"],
       amenityNames: [
         "High-Speed Wi-Fi",
         "Air Conditioning & Generator Backup",
@@ -110,14 +150,14 @@ async function main() {
     {
       name: "Family Twin Room",
       description:
-        "Equipped with two double beds, spacious floor area, extra storage, and private bathroom suitable for families.",
+        "Two double beds, spacious floor area, extra storage, and private bathroom — ideal for families.",
       basePrice: 22000,
       capacityAdults: 4,
       capacityChildren: 2,
       sizeSqm: 45,
       bedConfig: "2 Queen Beds",
-      roomNumbers: ["401", "402", "403", "404"],
       floor: 4,
+      roomNumbers: ["401", "402", "403", "404"],
       amenityNames: [
         "High-Speed Wi-Fi",
         "Air Conditioning & Generator Backup",
@@ -128,7 +168,10 @@ async function main() {
     },
   ];
 
-  for (const rt of roomTypesData) {
+  let totalRooms = 0;
+
+  for (const rt of roomTypesConfig) {
+    // Create the RoomType
     const roomType = await prisma.roomType.create({
       data: {
         hotelId: hotel.id,
@@ -142,37 +185,67 @@ async function main() {
       },
     });
 
-    console.log(`Created Room Type: ${roomType.name} (${roomType.id})`);
-
-    // Connect Amenities
-    for (const amName of rt.amenityNames) {
-      const amId = createdAmenities[amName];
-      if (amId) {
-        await prisma.roomTypeAmenity.create({
-          data: {
-            roomTypeId: roomType.id,
-            amenityId: amId,
-          },
-        });
+    // Link amenities
+    for (const amenityName of rt.amenityNames) {
+      const amenityId = amenityMap[amenityName];
+      if (!amenityId) {
+        throw new Error(`Unknown amenity: "${amenityName}"`);
       }
+      await prisma.roomTypeAmenity.create({
+        data: { roomTypeId: roomType.id, amenityId },
+      });
     }
 
-    // Create Physical Rooms
-    for (const num of rt.roomNumbers) {
+    // Create physical rooms
+    for (const roomNumber of rt.roomNumbers) {
       await prisma.room.create({
         data: {
           hotelId: hotel.id,
           roomTypeId: roomType.id,
-          roomNumber: num,
+          roomNumber,
           floor: rt.floor,
           status: RoomStatus.AVAILABLE,
         },
       });
     }
-    console.log(`Created ${rt.roomNumbers.length} Physical Rooms for ${roomType.name}.`);
+
+    totalRooms += rt.roomNumbers.length;
+    console.log(
+      `  ✓  RoomType "${roomType.name}"  →  ${rt.roomNumbers.length} rooms (${rt.roomNumbers.join(", ")})`
+    );
   }
 
-  console.log("Seeding completed successfully!");
+  console.log(`\n  ✓  ${totalRooms} physical rooms created across ${roomTypesConfig.length} room types`);
+
+  // ── 5. Demo Users ─────────────────────────────────────────────────────────
+  //
+  // Passwords are SHA-256 hashed here ONLY for seed convenience.
+  // The real authentication module MUST use bcrypt/Argon2.
+  //
+  const adminUser = await prisma.user.create({
+    data: {
+      email: "admin@hamiltonhotel.pk",
+      passwordHash: hashPassword("Admin1234!"),
+      name: "Hamilton Admin",
+      phone: "+92-300-0000001",
+      role: UserRole.ADMIN,
+    },
+  });
+
+  const customerUser = await prisma.user.create({
+    data: {
+      email: "guest@example.com",
+      passwordHash: hashPassword("Guest1234!"),
+      name: "Demo Guest",
+      phone: "+92-300-0000002",
+      role: UserRole.CUSTOMER,
+    },
+  });
+
+  console.log(`\n  ✓  Demo users:`);
+  console.log(`       Admin    → ${adminUser.email}  (password: Admin1234!)`);
+  console.log(`       Customer → ${customerUser.email}  (password: Guest1234!)`);
+  console.log("\n🌱  Seeding complete.\n");
 }
 
 main()

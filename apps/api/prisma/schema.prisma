@@ -7,45 +7,9 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Hotel {
-  id          String     @id @default(uuid())
-  name        String
-  address     String
-  city        String
-  country     String
-  description String?
-  roomTypes   RoomType[]
-  rooms       Room[]
-  createdAt   DateTime   @default(now())
-}
-
-model RoomType {
-  id               String            @id @default(uuid())
-  hotelId          String
-  hotel            Hotel             @relation(fields: [hotelId], references: [id])
-  name             String
-  description      String?
-  basePrice        Decimal
-  capacityAdults   Int
-  capacityChildren Int
-  sizeSqm          Float?
-  bedConfig        String?
-  rooms            Room[]
-  amenities        RoomTypeAmenity[]
-  createdAt        DateTime          @default(now())
-}
-
-model Room {
-  id         String     @id @default(uuid())
-  hotelId    String
-  hotel      Hotel      @relation(fields: [hotelId], references: [id])
-  roomTypeId String
-  roomType   RoomType   @relation(fields: [roomTypeId], references: [id])
-  roomNumber String
-  floor      Int?
-  status     RoomStatus @default(AVAILABLE)
-  bookings   Booking[]
-}
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
 
 enum RoomStatus {
   AVAILABLE
@@ -53,49 +17,273 @@ enum RoomStatus {
   INACTIVE
 }
 
+enum UserRole {
+  CUSTOMER
+  STAFF
+  ADMIN
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CHECKED_IN
+  CHECKED_OUT
+  CANCELLED
+  NO_SHOW
+}
+
+enum PaymentStatus {
+  UNPAID
+  PARTIALLY_PAID
+  PAID
+  REFUNDED
+}
+
+enum GuestType {
+  ADULT
+  CHILD
+}
+
+// ---------------------------------------------------------------------------
+// Hotel
+// ---------------------------------------------------------------------------
+
+model Hotel {
+  id          String   @id @default(uuid())
+  name        String
+  address     String
+  city        String
+  country     String
+  description String?
+  timezone    String   // e.g. "Asia/Karachi"  — used to interpret checkIn/checkOut boundaries
+  currency    String   // e.g. "PKR"           — default currency for new bookings
+
+  roomTypes   RoomType[]
+  rooms       Room[]
+  bookings    Booking[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// RoomType  — the sellable accommodation product (not the physical room)
+// ---------------------------------------------------------------------------
+
+model RoomType {
+  id               String   @id @default(uuid())
+  hotelId          String
+  hotel            Hotel    @relation(fields: [hotelId], references: [id])
+
+  name             String
+  description      String?
+  basePrice        Decimal
+  capacityAdults   Int
+  capacityChildren Int
+  sizeSqm          Float?   // floor area in m² — not monetary so Float is acceptable
+  bedConfig        String?  // free-text e.g. "1 King Bed", "2 Queen Beds"
+
+  rooms            Room[]
+  amenities        RoomTypeAmenity[]
+  bookingRooms     BookingRoom[]
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@unique([hotelId, name])
+}
+
+// ---------------------------------------------------------------------------
+// Room  — a single physical room unit (inventory)
+//
+// IMPORTANT: Room.status is an OPERATIONAL flag (maintenance/inactive).
+// It is NOT a real-time availability flag.  Whether a specific room is
+// available on a date range must be derived from BookingRoom records.
+//
+// Do NOT add RESERVED or OCCUPIED to RoomStatus.
+// ---------------------------------------------------------------------------
+
+model Room {
+  id         String     @id @default(uuid())
+  hotelId    String
+  hotel      Hotel      @relation(fields: [hotelId], references: [id])
+
+  roomTypeId String
+  roomType   RoomType   @relation(fields: [roomTypeId], references: [id])
+
+  roomNumber String
+  floor      Int?
+  status     RoomStatus @default(AVAILABLE)
+
+  bookingRooms BookingRoom[]
+
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  @@unique([hotelId, roomNumber])
+  @@index([roomTypeId, status])
+}
+
+// ---------------------------------------------------------------------------
+// Amenity  — a named feature (Wi-Fi, AC, Parking, …) linked to room types
+// ---------------------------------------------------------------------------
+
 model Amenity {
   id        String            @id @default(uuid())
-  name      String
+  name      String            @unique
   iconKey   String?
+
   roomTypes RoomTypeAmenity[]
 }
 
 model RoomTypeAmenity {
   roomTypeId String
   roomType   RoomType @relation(fields: [roomTypeId], references: [id])
+
   amenityId  String
   amenity    Amenity  @relation(fields: [amenityId], references: [id])
 
   @@id([roomTypeId, amenityId])
 }
 
-model Guest {
-  id        String    @id @default(uuid())
-  name      String
-  email     String
-  phone     String?
-  bookings  Booking[]
-  createdAt DateTime  @default(now())
+// ---------------------------------------------------------------------------
+// User  — authenticated account (customer, staff, or admin)
+//
+// NOTE: User is a login-capable account.  The people physically staying
+// in the rooms are represented by BookingGuest records, NOT by User rows.
+// These are intentionally separate concepts.
+// ---------------------------------------------------------------------------
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  phone        String?
+  role         UserRole @default(CUSTOMER)
+
+  bookings     Booking[]
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
+
+// ---------------------------------------------------------------------------
+// Booking  — a reservation tying a contact/user to one or more BookingRooms
+// ---------------------------------------------------------------------------
 
 model Booking {
   id               String        @id @default(uuid())
-  guestId          String
-  guest            Guest         @relation(fields: [guestId], references: [id])
-  roomId           String
-  room             Room          @relation(fields: [roomId], references: [id])
-  checkIn          DateTime
-  checkOut         DateTime
-  adults           Int
-  children         Int           @default(0)
-  status           BookingStatus @default(PENDING)
-  totalPrice       Decimal
   bookingReference String        @unique
+
+  hotelId          String
+  hotel            Hotel         @relation(fields: [hotelId], references: [id])
+
+  // Nullable: walk-in bookings created by staff may not have a registered user.
+  userId           String?
+  user             User?         @relation(fields: [userId], references: [id])
+
+  // Contact snapshot — stored independently so the booking record is
+  // self-contained even if the User record changes later.
+  contactName      String
+  contactEmail     String
+  contactPhone     String?
+
+  status           BookingStatus @default(PENDING)
+  paymentStatus    PaymentStatus @default(UNPAID)
+
+  // Snapshot of total at booking time — changing RoomType.basePrice later
+  // must NOT affect this value.
+  totalPrice       Decimal
+  currency         String        // snapshot of Hotel.currency at booking time
+
+  // Cancellation fields (populated when status → CANCELLED)
+  cancellationReason String?
+  cancelledAt        DateTime?
+
+  rooms            BookingRoom[]
+  guests           BookingGuest[]
+
   createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  @@index([status])
+  @@index([userId])
+  @@index([hotelId])
 }
 
-enum BookingStatus {
-  PENDING
-  CONFIRMED
-  CANCELLED
+// ---------------------------------------------------------------------------
+// BookingRoom  — one room-line inside a booking
+//
+// Customers book a RoomType (product), not a physical Room number.
+// roomId is intentionally nullable so a customer can complete a booking
+// before staff assigns the physical room.
+//
+// CONCURRENCY WARNING:
+//   The PostgreSQL exclusion constraint below prevents two BookingRooms
+//   from sharing the same physical roomId for overlapping date ranges.
+//   However, it ONLY covers cases where roomId IS NOT NULL.
+//
+//   RoomType-level overbooking (i.e. more BookingRooms for a given RoomType
+//   than physical rooms exist) is NOT prevented by this schema alone.
+//   That protection must be implemented in the Booking service layer via
+//   a serialised database transaction (SELECT FOR UPDATE / advisory locks)
+//   when the booking API is built.
+// ---------------------------------------------------------------------------
+
+model BookingRoom {
+  id        String  @id @default(uuid())
+
+  bookingId String
+  booking   Booking @relation(fields: [bookingId], references: [id])
+
+  roomTypeId String
+  roomType   RoomType @relation(fields: [roomTypeId], references: [id])
+
+  // Assigned by staff after booking — nullable until assigned.
+  roomId    String?
+  room      Room?   @relation(fields: [roomId], references: [id])
+
+  checkIn   DateTime
+  checkOut  DateTime
+
+  adults    Int
+  children  Int      @default(0)
+
+  // Price snapshots — must not change if RoomType.basePrice changes later.
+  pricePerNight Decimal
+  subtotal      Decimal
+
+  guests    BookingGuest[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Indexes to support availability queries:
+  //   "find all BookingRooms for this RoomType that overlap these dates"
+  //   "find all BookingRooms for this physical Room"
+  @@index([roomTypeId, checkIn, checkOut])
+  @@index([roomId])
+}
+
+// ---------------------------------------------------------------------------
+// BookingGuest  — a named person attached to a booking or a specific room
+//
+// bookingRoomId is nullable: guest assignment to a specific room is optional
+// at initial booking time.
+// ---------------------------------------------------------------------------
+
+model BookingGuest {
+  id            String       @id @default(uuid())
+
+  bookingId     String
+  booking       Booking      @relation(fields: [bookingId], references: [id])
+
+  bookingRoomId String?
+  bookingRoom   BookingRoom? @relation(fields: [bookingRoomId], references: [id])
+
+  fullName      String
+  guestType     GuestType
+
+  createdAt     DateTime     @default(now())
 }
