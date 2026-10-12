@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Room } from "@/data/rooms";
+import type { RoomType } from "@/types/room";
 import { HOTEL_INFO } from "@/data/hotelInfo";
 import { formatCurrency } from "@/utils/formatters";
 import {
@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 
 interface BookingCheckoutWizardProps {
-  room: Room;
+  room: RoomType;
 }
 
 interface GuestDetails {
@@ -95,7 +95,7 @@ export default function BookingCheckoutWizard({ room }: BookingCheckoutWizardPro
   const [bookingRef, setBookingRef] = useState("");
 
   // Price Math
-  const subtotal = room.pricePerNight * nights;
+  const subtotal = parseFloat(room.basePrice) * nights;
   const taxAmount = Math.round(subtotal * 0.16); // 16% GST
   const grandTotal = subtotal + taxAmount;
 
@@ -217,7 +217,7 @@ export default function BookingCheckoutWizard({ room }: BookingCheckoutWizardPro
                     {room.floor}
                   </span>
                   <h2 className="font-heading text-lg font-bold text-text-primary">{room.name}</h2>
-                  <p className="text-xs text-text-muted mt-0.5">{room.bedType} &bull; {room.sizeSqM} m²</p>
+                  <p className="text-xs text-text-muted mt-0.5">{room.bedConfig ?? "—"} &bull; {room.sizeSqm != null ? `${room.sizeSqm} m²` : "—"}</p>
                 </div>
               </div>
 
@@ -280,7 +280,7 @@ export default function BookingCheckoutWizard({ room }: BookingCheckoutWizardPro
 
               <div className="flex flex-col gap-2.5 text-sm">
                 <div className="flex items-center justify-between text-text-secondary">
-                  <span>{formatCurrency(room.pricePerNight)} &times; {nights} Night{nights > 1 ? "s" : ""}</span>
+                  <span>{formatCurrency(room.basePrice)} &times; {nights} Night{nights > 1 ? "s" : ""}</span>
                   <span className="font-semibold text-text-primary">{formatCurrency(subtotal)}</span>
                 </div>
                 <div className="flex items-center justify-between text-text-secondary">

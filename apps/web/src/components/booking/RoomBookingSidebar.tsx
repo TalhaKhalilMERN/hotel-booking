@@ -7,11 +7,11 @@ import { Calendar, ShieldCheck } from "lucide-react";
 
 interface RoomBookingSidebarProps {
   roomName: string;
-  pricePerNight: number;
+  basePrice: string;
   roomId?: string;
 }
 
-export default function RoomBookingSidebar({ roomName, pricePerNight, roomId = "dlx-02" }: RoomBookingSidebarProps) {
+export default function RoomBookingSidebar({ roomName, basePrice, roomId }: RoomBookingSidebarProps) {
   // Start as empty strings — server and client render identically ("empty").
   // useEffect sets the real dates only after hydration on the client.
   const [checkIn, setCheckIn] = useState("");
@@ -36,7 +36,7 @@ export default function RoomBookingSidebar({ roomName, pricePerNight, roomId = "
           </span>
           <div>
             <span className="font-heading text-3xl font-extrabold text-text-primary">
-              {formatCurrency(pricePerNight)}
+              {formatCurrency(basePrice)}
             </span>
             <span className="text-xs text-text-muted"> / night</span>
           </div>

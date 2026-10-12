@@ -2,12 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Room } from "@/data/rooms";
+import type { RoomType } from "@/types/room";
 import { formatCurrency } from "@/utils/formatters";
-import { Star, Heart, ArrowRight, Wifi, Wind, Coffee, Tv } from "lucide-react";
+import { Star, Heart, ArrowRight, Wifi, Wind, Coffee } from "lucide-react";
 
 interface RoomCardProps {
-  room: Room;
+  room: RoomType;
   highlighted?: boolean;
   badgeText?: string;
   horizontal?: boolean;
@@ -21,7 +21,7 @@ export default function RoomCard({
 }: RoomCardProps) {
   const [saved, setSaved] = useState(false);
 
-  // Map 2-3 icon amenities for chips
+  // Fixed amenity chips — always shown regardless of API amenity list
   const amenityChips = [
     { label: "Free Wi-Fi", icon: <Wifi size={12} /> },
     { label: "Generator AC", icon: <Wind size={12} /> },
@@ -89,7 +89,8 @@ export default function RoomCard({
 
           {/* Short Spec Line */}
           <p className="text-xs text-text-muted mb-3">
-            Up to {room.capacity.adults} guests &bull; {room.bedType} &bull; {room.sizeSqM} m²
+            Up to {room.capacityAdults} guests &bull; {room.bedConfig ?? "—"} &bull;{" "}
+            {room.sizeSqm != null ? `${room.sizeSqm} m²` : "—"}
           </p>
 
           {/* Amenity Chips */}
@@ -118,7 +119,7 @@ export default function RoomCard({
             </span>
             <div>
               <span className="font-heading text-lg sm:text-xl font-extrabold text-text-primary">
-                {formatCurrency(room.pricePerNight)}
+                {formatCurrency(room.basePrice)}
               </span>
               <span className="text-xs text-text-muted"> / night</span>
             </div>

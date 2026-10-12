@@ -1,24 +1,52 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getRoomById, ROOMS_DATA } from "@/data/rooms";
+import { getHotelWithRoomTypes } from "@/lib/api";
+import { enrichRoomTypesWithPresentation } from "@/lib/roomPresentation";
 import { HOTEL_INFO } from "@/data/hotelInfo";
 import { formatCurrency } from "@/utils/formatters";
-import { Users, BedDouble, Maximize, CheckCircle2, ArrowLeft, Sparkles, MapPin } from "lucide-react";
+import {
+  Users,
+  BedDouble,
+  Maximize,
+  CheckCircle2,
+  ArrowLeft,
+  Sparkles,
+  MapPin,
+} from "lucide-react";
 import RoomBookingSidebar from "@/components/booking/RoomBookingSidebar";
 
 interface RoomDetailPageProps {
   params: Promise<{ id: string }>;
 }
 
+/**
+ * Generates static params using real room type UUIDs and presentation slugs from the API.
+ * Falls back to an empty array (dynamic rendering) if the API is unavailable at build time.
+ */
 export async function generateStaticParams() {
-  return ROOMS_DATA.map((room) => ({
-    id: room.id,
-  }));
+  try {
+    const { roomTypesResponse } = await getHotelWithRoomTypes();
+    const rooms = enrichRoomTypesWithPresentation(roomTypesResponse.roomTypes);
+    return rooms.map((room) => ({ id: room.id }));
+  } catch {
+    return [];
+  }
 }
 
 export default async function RoomDetailPage({ params }: RoomDetailPageProps) {
   const resolvedParams = await params;
-  const room = getRoomById(resolvedParams.id);
+  const paramId = resolvedParams.id;
+
+  // Fetch live room types and enrich with presentation metadata
+  let room;
+  try {
+    const { roomTypesResponse } = await getHotelWithRoomTypes();
+    const rooms = enrichRoomTypesWithPresentation(roomTypesResponse.roomTypes);
+    // Match by real database UUID or presentation slug
+    room = rooms.find((r) => r.id === paramId || r.slug === paramId);
+  } catch (error) {
+    console.error("[RoomDetailPage] Failed to fetch room types:", error);
+  }
 
   if (!room) {
     notFound();
@@ -39,12 +67,26 @@ export default async function RoomDetailPage({ params }: RoomDetailPageProps) {
         {/* Gallery Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10 h-auto md:h-[460px]">
           <div className="md:col-span-2 relative min-h-0 h-[280px] sm:h-[360px] md:h-full rounded-2xl overflow-hidden shadow-card border border-border/70 bg-surface-warm">
-            <img src={room.images[0] || room.heroImage} alt={room.name} className="absolute inset-0 w-full h-full object-cover" />
+            <img
+              src={room.images[0] || room.heroImage}
+              alt={room.name}
+              className="absolute inset-0 w-full h-full object-cover"
+            />
           </div>
           <div className="flex flex-row md:flex-col gap-4 h-[140px] sm:h-[180px] md:h-full">
-            {(room.images.slice(1, 3).length > 0 ? room.images.slice(1, 3) : [room.heroImage, room.heroImage]).map((img, idx) => (
-              <div key={idx} className="flex-1 relative min-h-0 h-full md:h-0 rounded-2xl overflow-hidden shadow-xs border border-border/70 bg-surface-warm group">
-                <img src={img} alt={`${room.name} detail ${idx + 1}`} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+            {(room.images.slice(1, 3).length > 0
+              ? room.images.slice(1, 3)
+              : [room.heroImage, room.heroImage]
+            ).map((img, idx) => (
+              <div
+                key={idx}
+                className="flex-1 relative min-h-0 h-full md:h-0 rounded-2xl overflow-hidden shadow-xs border border-border/70 bg-surface-warm group"
+              >
+                <img
+                  src={img}
+                  alt={`${room.name} detail ${idx + 1}`}
+                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                />
               </div>
             ))}
           </div>
@@ -69,15 +111,17 @@ export default async function RoomDetailPage({ params }: RoomDetailPageProps) {
             <div className="card-base p-5 rounded-2xl bg-white border border-border/70 mb-8 flex flex-wrap items-center gap-6 text-sm font-semibold text-text-primary">
               <div className="flex items-center gap-2">
                 <Users size={18} className="text-accent-blue" />
-                <span>Up to {room.capacity.adults} Adults, {room.capacity.children} Children</span>
+                <span>
+                  Up to {room.capacityAdults} Adults, {room.capacityChildren} Children
+                </span>
               </div>
               <div className="flex items-center gap-2">
                 <BedDouble size={18} className="text-accent-blue" />
-                <span>{room.bedType}</span>
+                <span>{room.bedConfig ?? "—"}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Maximize size={18} className="text-accent-blue" />
-                <span>{room.sizeSqM} m² floor space</span>
+                <span>{room.sizeSqm != null ? `${room.sizeSqm} m²` : "—"} floor space</span>
               </div>
             </div>
 
@@ -91,13 +135,16 @@ export default async function RoomDetailPage({ params }: RoomDetailPageProps) {
 
             {/* Room Amenities */}
             <h2 className="font-heading text-xl font-bold text-text-primary mb-4">
-              Room Amenities & Facilities
+              Room Amenities &amp; Facilities
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-10">
-              {room.amenities.map((amenity, index) => (
-                <div key={index} className="card-base p-3.5 px-4 rounded-xl bg-white border border-border/70 flex items-center gap-3 text-sm font-semibold text-text-primary">
+              {room.amenities.map((amenity) => (
+                <div
+                  key={amenity.id}
+                  className="card-base p-3.5 px-4 rounded-xl bg-white border border-border/70 flex items-center gap-3 text-sm font-semibold text-text-primary"
+                >
                   <CheckCircle2 size={16} className="text-accent-blue shrink-0" />
-                  <span>{amenity}</span>
+                  <span>{amenity.name}</span>
                 </div>
               ))}
             </div>
@@ -106,9 +153,12 @@ export default async function RoomDetailPage({ params }: RoomDetailPageProps) {
             <div className="card-base p-5 rounded-2xl bg-white border border-border/70 flex items-start gap-3">
               <MapPin size={20} className="text-accent-blue shrink-0 mt-0.5" />
               <div>
-                <h3 className="font-heading text-base font-bold text-text-primary">Location Reference</h3>
+                <h3 className="font-heading text-base font-bold text-text-primary">
+                  Location Reference
+                </h3>
                 <p className="text-xs text-text-secondary mt-0.5">
-                  Located at {HOTEL_INFO.name}, {HOTEL_INFO.address}. Convenient access to GT Road with secure on-site parking.
+                  Located at {HOTEL_INFO.name}, {HOTEL_INFO.address}. Convenient access to GT Road
+                  with secure on-site parking.
                 </p>
               </div>
             </div>
@@ -118,7 +168,7 @@ export default async function RoomDetailPage({ params }: RoomDetailPageProps) {
           <div className="lg:col-span-4">
             <RoomBookingSidebar
               roomName={room.name}
-              pricePerNight={room.pricePerNight}
+              basePrice={room.basePrice}
               roomId={room.id}
             />
           </div>
