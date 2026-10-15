@@ -13,7 +13,7 @@
  */
 
 import { PrismaClient, RoomStatus, UserRole } from "@prisma/client";
-import * as crypto from "crypto";
+import * as argon2 from "argon2";
 
 const prisma = new PrismaClient();
 
@@ -22,15 +22,10 @@ const prisma = new PrismaClient();
 // ---------------------------------------------------------------------------
 
 /**
- * Produces a SHA-256 hex digest of the password.
- *
- * NOTE: SHA-256 is used here only for seeding demo/test accounts so that
- * no additional npm package is required in the seed script.
- * The real authentication layer MUST use bcrypt (cost ≥ 12) or Argon2.
- * Never use SHA-256 for production passwords.
+ * Produces an Argon2id hash of the password.
  */
-function hashPassword(plain: string): string {
-  return crypto.createHash("sha256").update(plain).digest("hex");
+async function hashPassword(plain: string): Promise<string> {
+  return argon2.hash(plain, { type: argon2.argon2id });
 }
 
 // ---------------------------------------------------------------------------
@@ -218,14 +213,10 @@ async function main() {
   console.log(`\n  ✓  ${totalRooms} physical rooms created across ${roomTypesConfig.length} room types`);
 
   // ── 5. Demo Users ─────────────────────────────────────────────────────────
-  //
-  // Passwords are SHA-256 hashed here ONLY for seed convenience.
-  // The real authentication module MUST use bcrypt/Argon2.
-  //
   const adminUser = await prisma.user.create({
     data: {
       email: "admin@hamiltonhotel.pk",
-      passwordHash: hashPassword("Admin1234!"),
+      passwordHash: await hashPassword("Admin1234!"),
       name: "Hamilton Admin",
       phone: "+92-300-0000001",
       role: UserRole.ADMIN,
@@ -235,7 +226,7 @@ async function main() {
   const customerUser = await prisma.user.create({
     data: {
       email: "guest@example.com",
-      passwordHash: hashPassword("Guest1234!"),
+      passwordHash: await hashPassword("Guest1234!"),
       name: "Demo Guest",
       phone: "+92-300-0000002",
       role: UserRole.CUSTOMER,
