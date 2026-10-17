@@ -1,4 +1,5 @@
 import type { ApiHotel, ApiRoomTypesResponse } from "@/types/api";
+import { cookies } from "next/headers";
 
 /**
  * Custom error class for API request failures.
@@ -36,14 +37,30 @@ export function getApiBaseUrl(): string {
 }
 
 /**
- * Core server-side HTTP request wrapper with robust error handling.
+ * Core server-side HTTP request wrapper with robust error handling and
+ * automatic Bearer token forwarding from HttpOnly session cookies.
  */
-async function apiFetch<T>(endpoint: string, options: FetchOptions = {}): Promise<T> {
+export async function apiFetch<T>(endpoint: string, options: FetchOptions = {}): Promise<T> {
   const baseUrl = getApiBaseUrl();
   const normalizedEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
   const fullUrl = `${baseUrl}${normalizedEndpoint}`;
 
   const { revalidate, cache = "no-store", headers, ...restOptions } = options;
+
+  // Retrieve cookie for server-side authenticated requests if present
+  let authHeader: Record<string, string> = {};
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("admin_token")?.value;
+    if (token) {
+      authHeader = {
+        Authorization: `Bearer ${token}`,
+        Cookie: `admin_token=${token}`,
+      };
+    }
+  } catch {
+    // cookies() might not be available in non-request contexts
+  }
 
   let response: Response;
   try {
@@ -51,6 +68,7 @@ async function apiFetch<T>(endpoint: string, options: FetchOptions = {}): Promis
       ...restOptions,
       headers: {
         Accept: "application/json",
+        ...authHeader,
         ...headers,
       },
       cache: revalidate !== undefined ? undefined : cache,

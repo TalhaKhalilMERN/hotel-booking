@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import AdminSidebar from "@/components/layout/AdminSidebar";
+import AdminShell from "@/components/layout/AdminShell";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -24,10 +24,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable} suppressHydrationWarning>
       <body suppressHydrationWarning>
-        <div className="flex min-h-screen">
-          <AdminSidebar />
-          <div className="admin-content flex-1">{children}</div>
-        </div>
+        <AdminShell>{children}</AdminShell>
       </body>
     </html>
   );
