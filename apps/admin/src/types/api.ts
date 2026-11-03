@@ -43,3 +43,21 @@ export interface ApiRoomTypesResponse {
   currency: string;
   roomTypes: ApiRoomType[];
 }
+
+export type RoomStatus = "AVAILABLE" | "OCCUPIED" | "MAINTENANCE" | "OUT_OF_SERVICE";
+
+export interface ApiRoomSummary {
+  id: string;
+  roomNumber: string;
+  floor: number;
+  status: RoomStatus;
+  roomType: {
+    id: string;
+    name: string;
+  };
+}
+
+export interface ApiRoomsResponse {
+  hotelId: string;
+  rooms: ApiRoomSummary[];
+}

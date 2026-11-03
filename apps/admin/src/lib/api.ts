@@ -1,4 +1,4 @@
-import type { ApiHotel, ApiRoomTypesResponse } from "@/types/api";
+import type { ApiHotel, ApiRoomTypesResponse, ApiRoomsResponse } from "@/types/api";
 import { cookies } from "next/headers";
 
 /**
@@ -149,4 +149,34 @@ export async function getHotelWithRoomTypes(
   const hotel = await getHotel(options);
   const roomTypesResponse = await getRoomTypes(hotel.id, options);
   return { hotel, roomTypesResponse };
+}
+
+/** Fetches physical room inventory for a hotel. Endpoint: GET /hotels/:hotelId/rooms */
+export async function getRooms(
+  hotelId: string,
+  options?: FetchOptions
+): Promise<ApiRoomsResponse> {
+  if (!hotelId || typeof hotelId !== "string" || hotelId.trim() === "") {
+    throw new ApiError(
+      "hotelId parameter is required and cannot be empty",
+      400,
+      "/hotels/:hotelId/rooms"
+    );
+  }
+  return apiFetch<ApiRoomsResponse>(
+    `/hotels/${encodeURIComponent(hotelId.trim())}/rooms`,
+    options
+  );
+}
+
+/**
+ * Composite helper: resolves the seeded hotel and its physical rooms without
+ * hard-coding any hotel UUID.
+ */
+export async function getHotelWithRooms(
+  options?: FetchOptions
+): Promise<{ hotel: ApiHotel; roomsResponse: ApiRoomsResponse }> {
+  const hotel = await getHotel(options);
+  const roomsResponse = await getRooms(hotel.id, options);
+  return { hotel, roomsResponse };
 }

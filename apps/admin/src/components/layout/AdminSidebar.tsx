@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   BedDouble,
   Building2,
+  DoorOpen,
   AlertCircle,
   ChevronRight,
 } from "lucide-react";
@@ -20,12 +21,12 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
   { href: "/room-types", label: "Room Types", icon: BedDouble },
+  { href: "/rooms", label: "Physical Rooms", icon: DoorOpen },
   { href: "/hotel", label: "Hotel Details", icon: Building2 },
 ];
 
 const COMING_SOON: NavItem[] = [
   { href: "#", label: "Bookings", icon: AlertCircle, badge: "Soon" },
-  { href: "#", label: "Physical Rooms", icon: AlertCircle, badge: "Soon" },
 ];
 
 export default function AdminSidebar() {
